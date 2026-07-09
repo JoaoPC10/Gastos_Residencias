@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<GastosContext>();
+
+// Adicionando a política de CORS para o frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("React",
@@ -29,8 +31,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Deica visível as rotas criadas para os objetos, sendo possível testar no Swagger
 app.PessoaRoutes();
 app.TransacaoRoutes();
+
 app.UseCors("React");
 app.UseHttpsRedirection();
 app.Run();

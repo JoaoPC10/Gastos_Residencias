@@ -55,7 +55,7 @@ export default function App() {
     pessoaId: ''
   });
 
-  // --- Estado para edição de pessoa ---
+  
   const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null);
   const [editForm, setEditForm] = useState<EditPessoaForm>({ name: '' });
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
@@ -114,7 +114,7 @@ export default function App() {
     } catch (err) { console.error(err); }
   };
 
-  // --- Abre o modal de edição preenchido com os dados atuais da pessoa ---
+  
   const handleOpenEditPessoa = (p: Pessoa): void => {
     setError('');
     setEditingPessoa(p);
@@ -126,7 +126,7 @@ export default function App() {
     setEditForm({ name: '' });
   };
 
-  // --- Envia o PUT /pessoa/{id} com o novo nome ---
+  {/* ========== sidebar ========== */}
   const handleUpdatePessoa = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!editingPessoa) return;
@@ -177,7 +177,7 @@ export default function App() {
     }
 
     if (pessoaSelecionada.idade < 18 && tipo === 'receita') {
-      setError(`⚠️ Ação Bloqueada: ${pessoaSelecionada.name} é menor de idade (${pessoaSelecionada.idade} anos). Apenas despesas podem ser cadastradas.`);
+      setError(` Ação Bloqueada: ${pessoaSelecionada.name} é menor de idade (${pessoaSelecionada.idade} anos). Apenas despesas podem ser cadastradas.`);
       return;
     }
 
@@ -216,13 +216,13 @@ export default function App() {
     window.print();
   };
 
+  {/* ========== função de exportar para csv ========== */}
   const exportarParaCSV = () => {
     if (transacoes.length === 0) {
       alert("Não há transações para exportar.");
       return;
     }
 
-    // Função de exportar para csv
     const cabecalho = ["ID Transacao", "Descricao", "Responsavel", "Idade", "Tipo", "Valor (R$)"];
 
     const linhas = transacoes.map(t => {
@@ -257,7 +257,7 @@ export default function App() {
   return (
     <div className="app-container">
 
-      {/* ========== SIDEBAR (DESKTOP) ========== */}
+      {/* ========== sidebar ========== */}
       <aside className="app-sidebar ledger-spine">
         <div className="sidebar-top">
           <div className="sidebar-logo-area">
@@ -292,7 +292,7 @@ export default function App() {
         </div>
       </aside>
 
-      {/* ========== HEADER (MOBILE) ========== */}
+      {/* ========== cabeçalho mobile ========== */}
       <header className="app-header-mobile">
         <BookOpen className="logo-icon" size={20} strokeWidth={1.75} />
         <div className="header-title-mobile">
@@ -301,7 +301,6 @@ export default function App() {
         <span className="font-mono current-tab-badge">{tabTitle}</span>
       </header>
 
-      {/* ========== CONTEÚDO PRINCIPAL ========== */}
       <div className="app-main-content paper-texture">
         <main className="content-wrapper">
 
@@ -312,7 +311,7 @@ export default function App() {
             </div>
           )}
 
-          {/* --- ABA: PESSOAS --- */}
+          {/* --- aba de pessoas --- */}
           {activeTab === 'pessoas' && (
             <div className="layout-grid animate-in">
               <div className="ledger-card p-6 form-box">
@@ -338,7 +337,7 @@ export default function App() {
                   <p className="empty-msg">Nenhuma pessoa registrada.</p>
                 ) : (
                   <>
-                    {/* Tabela — desktop */}
+                    
                     <div className="desktop-table-container">
                       <table className="ledger-table">
                         <thead>
@@ -371,7 +370,7 @@ export default function App() {
                       </table>
                     </div>
 
-                    {/* Lista — mobile */}
+                    
                     <div className="mobile-list-container">
                       {pessoas.map(p => (
                         <div key={p.id} className="ledger-row mobile-row-item">
@@ -396,7 +395,7 @@ export default function App() {
             </div>
           )}
 
-          {/* --- ABA: TRANSAÇÕES --- */}
+          {/* --- aba de transações --- */}
           {activeTab === 'transacoes' && (
             <div className="layout-grid animate-in">
               <div className="ledger-card p-6 form-box">
@@ -440,7 +439,7 @@ export default function App() {
                   <p className="empty-msg">Nenhuma transação lançada.</p>
                 ) : (
                   <>
-                    {/* Tabela — desktop */}
+                    
                     <div className="desktop-table-container">
                       <table className="ledger-table">
                         <thead>
@@ -475,7 +474,7 @@ export default function App() {
                       </table>
                     </div>
 
-                    {/* Lista — mobile */}
+                    
                     <div className="mobile-list-container">
                       {transacoes.map(t => {
                         const dono = pessoas.find(p => p.id === t.pessoaId);
@@ -505,7 +504,7 @@ export default function App() {
             </div>
           )}
 
-          {/* --- ABA: CONSULTA DE TOTAIS --- */}
+          {/* --- aba das consultas totais --- */}
           {activeTab === 'totais' && (
             <div className="ledger-card p-6 animate-in">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
@@ -516,7 +515,7 @@ export default function App() {
               </div>
 
 
-              {/* Tabela — desktop */}
+              
               <div className="desktop-table-container mb-8">
                 <table className="ledger-table">
                   <thead>
@@ -545,7 +544,7 @@ export default function App() {
                 </table>
               </div>
 
-              {/* Lista — mobile */}
+              
               <div className="mobile-list-container mb-8">
                 {pessoas.map(p => {
                   const { receitas, despesas, saldo } = calcularTotaisPorPessoa(p.id);
@@ -571,7 +570,7 @@ export default function App() {
                 })}
               </div>
 
-              {/* Resumo geral */}
+              
               <div className="summary-banner">
                 <div className="summary-block border-r-desktop">
                   <span className="font-mono summary-label">Receitas (Geral)</span>
@@ -594,7 +593,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* ========== NAV INFERIOR (MOBILE) ========== */}
+      {/* ========== Navbar para mobile) ========== */}
       <nav className="app-nav-mobile safe-bottom">
         {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
           const isActive = activeTab === key;
@@ -611,7 +610,7 @@ export default function App() {
         })}
       </nav>
 
-      {/* ========== MODAL: EDITAR PESSOA ========== */}
+      {/* ========== modal de editar pessoa ========== */}
       {editingPessoa && (
         <div
           style={{
