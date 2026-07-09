@@ -36,7 +36,6 @@ O objetivo do sistema é facilitar o registro e acompanhamento das despesas de u
 - React
 - TypeScript
 - Vite
-- Axios
 - CSS
 
 ---
