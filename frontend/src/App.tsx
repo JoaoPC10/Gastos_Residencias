@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, DollarSign, BarChart3, Trash2, Plus, AlertCircle, BookOpen, TrendingUp, TrendingDown } from 'lucide-react';
+import { User, DollarSign, BarChart3, Trash2, Plus, AlertCircle, BookOpen, TrendingUp, TrendingDown, Pencil, X } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:5137';
 
@@ -22,6 +22,10 @@ interface Transacao {
 interface PessoaForm {
   name: string;
   idade: string;
+}
+
+interface EditPessoaForm {
+  name: string;
 }
 
 interface TransacaoForm {
@@ -50,6 +54,11 @@ export default function App() {
     tipo: 'despesa',
     pessoaId: ''
   });
+
+  // --- Estado para edição de pessoa ---
+  const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null);
+  const [editForm, setEditForm] = useState<EditPessoaForm>({ name: '' });
+  const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
 
   useEffect(() => {
     fetchPessoas();
@@ -103,6 +112,50 @@ export default function App() {
         fetchTransacoes();
       }
     } catch (err) { console.error(err); }
+  };
+
+  // --- Abre o modal de edição preenchido com os dados atuais da pessoa ---
+  const handleOpenEditPessoa = (p: Pessoa): void => {
+    setError('');
+    setEditingPessoa(p);
+    setEditForm({ name: p.name });
+  };
+
+  const handleCancelEditPessoa = (): void => {
+    setEditingPessoa(null);
+    setEditForm({ name: '' });
+  };
+
+  // --- Envia o PUT /pessoa/{id} com o novo nome ---
+  const handleUpdatePessoa = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    if (!editingPessoa) return;
+    setError('');
+
+    if (!editForm.name.trim()) {
+      setError('O nome não pode ficar em branco.');
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/pessoa/${editingPessoa.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editForm.name, idade: editingPessoa.idade })
+      });
+      if (res.ok) {
+        handleCancelEditPessoa();
+        fetchPessoas();
+        fetchTransacoes();
+      } else {
+        setError('Não foi possível atualizar a pessoa.');
+      }
+    } catch (err) {
+      setError('Falha ao conectar com o servidor.');
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   const handleCreateTransacao = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -303,9 +356,14 @@ export default function App() {
                               <td className="font-weight-medium">{p.name}</td>
                               <td className="tabular">{p.idade} anos</td>
                               <td className="text-right">
-                                <button onClick={() => handleDeletePessoa(p.id)} className="btn-delete">
-                                  <Trash2 size={16} />
-                                </button>
+                                <div style={{ display: 'inline-flex', gap: '8px' }}>
+                                  <button onClick={() => handleOpenEditPessoa(p)} className="btn-delete" title="Editar pessoa">
+                                    <Pencil size={16} />
+                                  </button>
+                                  <button onClick={() => handleDeletePessoa(p.id)} className="btn-delete" title="Excluir pessoa">
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -321,9 +379,14 @@ export default function App() {
                             <p className="font-weight-medium">{p.name}</p>
                             <p className="font-mono table-id">{p.idade} anos · {p.id.substring(0, 8)}…</p>
                           </div>
-                          <button onClick={() => handleDeletePessoa(p.id)} className="btn-delete">
-                            <Trash2 size={17} />
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleOpenEditPessoa(p)} className="btn-delete" title="Editar pessoa">
+                              <Pencil size={17} />
+                            </button>
+                            <button onClick={() => handleDeletePessoa(p.id)} className="btn-delete" title="Excluir pessoa">
+                              <Trash2 size={17} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -547,6 +610,71 @@ export default function App() {
           );
         })}
       </nav>
+
+      {/* ========== MODAL: EDITAR PESSOA ========== */}
+      {editingPessoa && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px'
+          }}
+          onClick={handleCancelEditPessoa}
+        >
+          <div
+            className="ledger-card p-6 form-box"
+            style={{ width: '100%', maxWidth: '420px', position: 'relative' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={handleCancelEditPessoa}
+              className="btn-delete"
+              style={{ position: 'absolute', top: '12px', right: '12px' }}
+              title="Fechar"
+            >
+              <X size={16} />
+            </button>
+
+            <h2 className="font-display">Editar Pessoa</h2>
+            <p className="font-mono" style={{ marginBottom: '16px', fontSize: '0.85em' }}>
+              {editingPessoa.idade} anos · {editingPessoa.id.substring(0, 8)}…
+            </p>
+
+            <form onSubmit={handleUpdatePessoa} className="form-stack">
+              <div className="form-group">
+                <label className="font-mono">Nome Completo</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={e => setEditForm({ name: e.target.value })}
+                  className="field"
+                  placeholder="Ex: João Silva"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button type="submit" className="btn-primary" disabled={isSavingEdit}>
+                  {isSavingEdit ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEditPessoa}
+                  className="btn-primary"
+                  style={{ background: 'var(--gray-500, #6b7280)' }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
