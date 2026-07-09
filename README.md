@@ -16,7 +16,7 @@ O objetivo do sistema é facilitar o registro e acompanhamento das despesas de u
 - ✏️ Edição de pessoas
 - 🗑️ Exclusão de pessoas
 - 💸 Cadastro de transações
-- 📂 Organização por categorias
+- 📂 Organização por categorias(despesa ou receita)
 - 📊 Visualização das transações cadastradas
 - 🔗 Comunicação entre Frontend e Backend através de API REST
 
